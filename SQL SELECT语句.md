@@ -1557,7 +1557,7 @@ SQL create view语句
 
 ---
 
-SQL creaste view
+SQL create view
 
 可以从某个查询内部，某个存储过程内部或者另一个视图内部来使用视图。通过向视图函数添加函数，join等等，我们可以向用户精确地提交我们希望提交的数据。
 
@@ -1582,3 +1582,379 @@ create view [products above average price] as select productName, UnitPrice from
 select * from [Products above Average price]
 ```
 
+---
+
+## SQL日期
+
+当我们处理日期时，最难的任务恐怕是确保所插入的日期的格式，与数据库中日期列的格式相匹配。
+
+只要数据包含的只是日期部分，运行查询就不会出问题。但是，如果涉及时间，情况就有点复杂了。
+
+在讨论日期查询的复杂性之前，我们先来看看最重要的内建日期处理函数。 MySQL Date 函数
+
+下面的表格列出了 MySQL 中最重要的内建日期函数：
+
+| 函数                                                         | 描述                                |
+| ------------------------------------------------------------ | ----------------------------------- |
+| [NOW()](http://www.w3school.com.cn/sql/func_now.asp)         | 返回当前的日期和时间                |
+| [CURDATE()](http://www.w3school.com.cn/sql/func_curdate.asp) | 返回当前的日期                      |
+| [CURTIME()](http://www.w3school.com.cn/sql/func_curtime.asp) | 返回当前的时间                      |
+| [DATE()](http://www.w3school.com.cn/sql/func_date.asp)       | 提取日期或日期/时间表达式的日期部分 |
+| [EXTRACT()](http://www.w3school.com.cn/sql/func_extract.asp) | 返回日期/时间按的单独部分           |
+| [DATE_ADD()](http://www.w3school.com.cn/sql/func_date_add.asp) | 给日期添加指定的时间间隔            |
+| [DATE_SUB()](http://www.w3school.com.cn/sql/func_date_sub.asp) | 从日期减去指定的时间间隔            |
+| [DATEDIFF()](http://www.w3school.com.cn/sql/func_datediff_mysql.asp) | 返回两个日期之间的天数              |
+| [DATE_FORMAT()](http://www.w3school.com.cn/sql/func_date_format.asp) | 用不同的格式显示日期/时间           |
+
+## SQL Server Date 函数
+
+下面的表格列出了 SQL Server 中最重要的内建日期函数：
+
+| 函数                                                         | 描述                             |
+| ------------------------------------------------------------ | -------------------------------- |
+| [GETDATE()](http://www.w3school.com.cn/sql/func_getdate.asp) | 返回当前日期和时间               |
+| [DATEPART()](http://www.w3school.com.cn/sql/func_datepart.asp) | 返回日期/时间的单独部分          |
+| [DATEADD()](http://www.w3school.com.cn/sql/func_dateadd.asp) | 在日期中添加或减去指定的时间间隔 |
+| [DATEDIFF()](http://www.w3school.com.cn/sql/func_datediff.asp) | 返回两个日期之间的时间           |
+| [CONVERT()](http://www.w3school.com.cn/sql/func_convert.asp) | 用不同的格式显示日期/时间        |
+
+## SQL Date 数据类型
+
+MySQL 使用下列数据类型在数据库中存储日期或日期/时间值：
+
+- DATE - 格式 YYYY-MM-DD
+- DATETIME - 格式: YYYY-MM-DD HH:MM:SS
+- TIMESTAMP - 格式: YYYY-MM-DD HH:MM:SS
+- YEAR - 格式 YYYY 或 YY
+
+SQL Server 使用下列数据类型在数据库中存储日期或日期/时间值：
+
+- DATE - 格式 YYYY-MM-DD
+- DATETIME - 格式: YYYY-MM-DD HH:MM:SS
+- SMALLDATETIME - 格式: YYYY-MM-DD HH:MM:SS
+- TIMESTAMP - 格式: 唯一的数字
+
+## SQL 日期处理
+
+如果不涉及时间部分，那么我们可以轻松地比较两个日期！
+
+假设我们有下面这个 "Orders" 表：
+
+| OrderId | ProductName  | OrderDate  |
+| ------- | ------------ | ---------- |
+| 1       | computer     | 2008-12-26 |
+| 2       | printer      | 2008-12-26 |
+| 3       | electrograph | 2008-11-12 |
+| 4       | telephone    | 2008-10-19 |
+
+现在，我们希望从上表中选取 OrderDate 为 "2008-12-26" 的记录。
+
+我们使用如下 SELECT 语句：
+
+```
+SELECT * FROM Orders WHERE OrderDate='2008-12-26'
+```
+
+结果集：
+
+| OrderId | ProductName  | OrderDate  |
+| ------- | ------------ | ---------- |
+| 1       | computer     | 2008-12-26 |
+| 3       | electrograph | 2008-12-26 |
+
+现在假设 "Orders" 类似这样（请注意 "OrderDate" 列中的时间部分）：
+
+| OrderId | ProductName  | OrderDate           |
+| ------- | ------------ | ------------------- |
+| 1       | computer     | 2008-12-26 16:23:55 |
+| 2       | printer      | 2008-12-26 10:45:26 |
+| 3       | electrograph | 2008-11-12 14:12:08 |
+| 4       | telephone    | 2008-10-19 12:56:10 |
+
+如果我们使用上面的 SELECT 语句：
+
+```
+SELECT * FROM Orders WHERE OrderDate='2008-12-26'
+```
+
+那么我们得不到结果。这是由于该查询不含有时间部分的日期。
+
+提示：如果您希望使查询简单且更易维护，那么请不要在日期中使用时间部分！
+
+---
+
+## SQL NULL值
+
+NULL是遗漏的未知数据，表的列默认可以存放NULL值。
+
+---
+
+IS NULL和IS NOT NULL操作符
+
+---
+
+如果表中某个列是可选的，那么可以在不向该列添加值得情况下插入记录或者更新已有的记录。这意味着该字段以NULL值保存。NULL的处理方式与其他值不同，NULL用作未知的或不适用的值的占位符。无法比较NULL和0，他们是不相等的。
+
+---
+
+无法使用=， <或者<>测试NULL值，只能使用NULL或者IS NOT NULL操作符。
+
+请看下面的 "Persons" 表：
+
+| Id   | LastName | FirstName | Address      | City     |
+| ---- | -------- | --------- | ------------ | -------- |
+| 1    | Adams    | John      |              | London   |
+| 2    | Bush     | George    | Fifth Avenue | New York |
+| 3    | Carter   | Thomas    |              | Beijing  |
+
+```mysql
+#测试NULL
+SELECT LastName,FirstName,Address FROM Persons
+WHERE Address IS NULL
+#测试IS NOT NULL
+SELECT LastName,FirstName,Address FROM Persons
+WHERE Address IS NOT NULL
+```
+
+---
+
+## SQL NULL函数
+
+## SQL ISNULL()、NVL()、IFNULL() 和 COALESCE() 函数
+
+请看下面的 "Products" 表：
+
+| P_Id | ProductName | UnitPrice | UnitsInStock | UnitsOnOrder |
+| ---- | ----------- | --------- | ------------ | ------------ |
+| 1    | computer    | 699       | 25           | 15           |
+| 2    | printer     | 365       | 36           |              |
+| 3    | telephone   | 280       | 159          | 57           |
+
+假如 "UnitsOnOrder" 是可选的，而且可以包含 NULL 值。
+
+我们使用如下 SELECT 语句：
+
+```
+SELECT ProductName,UnitPrice*(UnitsInStock+UnitsOnOrder)
+FROM Products
+```
+
+在上面的例子中，如果有 "UnitsOnOrder" 值是 NULL，那么结果是 NULL。
+
+微软的 ISNULL() 函数用于规定如何处理 NULL 值。
+
+NVL(), IFNULL() 和 COALESCE() 函数也可以达到相同的结果。
+
+在这里，我们希望 NULL 值为 0。
+
+下面，如果 "UnitsOnOrder" 是 NULL，则不利于计算，因此如果值是 NULL 则 ISNULL() 返回 0。
+
+### SQL Server / MS Access
+
+```
+SELECT ProductName,UnitPrice*(UnitsInStock+ISNULL(UnitsOnOrder,0))
+FROM Products
+```
+
+### Oracle
+
+Oracle 没有 ISNULL() 函数。不过，我们可以使用 NVL() 函数达到相同的结果：
+
+```
+SELECT ProductName,UnitPrice*(UnitsInStock+NVL(UnitsOnOrder,0))
+FROM Products
+```
+
+### MySQL
+
+MySQL 也拥有类似 ISNULL() 的函数。不过它的工作方式与微软的 ISNULL() 函数有点不同。
+
+在 MySQL 中，我们可以使用 IFNULL() 函数，就像这样：
+
+```
+SELECT ProductName,UnitPrice*(UnitsInStock+IFNULL(UnitsOnOrder,0))
+FROM Products
+```
+
+或者我们可以使用 COALESCE() 函数，就像这样：
+
+```
+SELECT ProductName,UnitPrice*(UnitsInStock+COALESCE(UnitsOnOrder,0))
+FROM Products
+```
+
+---SQL 数据类型
+
+## MySQL 数据类型
+
+在 MySQL 中，有三种主要的类型：文本、数字和日期/时间类型。
+
+### Text 类型：
+
+| 数据类型         | 描述                                                         |
+| ---------------- | ------------------------------------------------------------ |
+| CHAR(size)       | 保存固定长度的字符串（可包含字母、数字以及特殊字符）。在括号中指定字符串的长度。最多 255 个字符。 |
+| VARCHAR(size)    | 保存可变长度的字符串（可包含字母、数字以及特殊字符）。在括号中指定字符串的最大长度。最多 255 个字符。注释：如果值的长度大于 255，则被转换为 TEXT 类型。 |
+| TINYTEXT         | 存放最大长度为 255 个字符的字符串。                          |
+| TEXT             | 存放最大长度为 65,535 个字符的字符串。                       |
+| BLOB             | 用于 BLOBs (Binary Large OBjects)。存放最多 65,535 字节的数据。 |
+| MEDIUMTEXT       | 存放最大长度为 16,777,215 个字符的字符串。                   |
+| MEDIUMBLOB       | 用于 BLOBs (Binary Large OBjects)。存放最多 16,777,215 字节的数据。 |
+| LONGTEXT         | 存放最大长度为 4,294,967,295 个字符的字符串。                |
+| LONGBLOB         | 用于 BLOBs (Binary Large OBjects)。存放最多 4,294,967,295 字节的数据。 |
+| ENUM(x,y,z,etc.) | 允许你输入可能值的列表。可以在 ENUM 列表中列出最大 65535 个值。如果列表中不存在插入的值，则插入空值。注释：这些值是按照你输入的顺序存储的。可以按照此格式输入可能的值：ENUM('X','Y','Z') |
+| SET              | 与 ENUM 类似，SET 最多只能包含 64 个列表项，不过 SET 可存储一个以上的值。 |
+
+### Number 类型：
+
+| 数据类型        | 描述                                                         |
+| --------------- | ------------------------------------------------------------ |
+| TINYINT(size)   | -128 到 127 常规。0 到 255 无符号*。在括号中规定最大位数。   |
+| SMALLINT(size)  | -32768 到 32767 常规。0 到 65535 无符号*。在括号中规定最大位数。 |
+| MEDIUMINT(size) | -8388608 到 8388607 普通。0 to 16777215 无符号*。在括号中规定最大位数。 |
+| INT(size)       | -2147483648 到 2147483647 常规。0 到 4294967295 无符号*。在括号中规定最大位数。 |
+| BIGINT(size)    | -9223372036854775808 到 9223372036854775807 常规。0 到 18446744073709551615 无符号*。在括号中规定最大位数。 |
+| FLOAT(size,d)   | 带有浮动小数点的小数字。在括号中规定最大位数。在 d 参数中规定小数点右侧的最大位数。 |
+| DOUBLE(size,d)  | 带有浮动小数点的大数字。在括号中规定最大位数。在 d 参数中规定小数点右侧的最大位数。 |
+| DECIMAL(size,d) | 作为字符串存储的 DOUBLE 类型，允许固定的小数点。             |
+
+\* 这些整数类型拥有额外的选项 UNSIGNED。通常，整数可以是负数或正数。如果添加 UNSIGNED 属性，那么范围将从 0 开始，而不是某个负数。
+
+### Date 类型：
+
+| 数据类型    | 描述                                                         |
+| ----------- | ------------------------------------------------------------ |
+| DATE()      | 日期。格式：YYYY-MM-DD注释：支持的范围是从 '1000-01-01' 到 '9999-12-31' |
+| DATETIME()  | *日期和时间的组合。格式：YYYY-MM-DD HH:MM:SS注释：支持的范围是从 '1000-01-01 00:00:00' 到 '9999-12-31 23:59:59' |
+| TIMESTAMP() | *时间戳。TIMESTAMP 值使用 Unix 纪元('1970-01-01 00:00:00' UTC) 至今的描述来存储。格式：YYYY-MM-DD HH:MM:SS注释：支持的范围是从 '1970-01-01 00:00:01' UTC 到 '2038-01-09 03:14:07' UTC |
+| TIME()      | 时间。格式：HH:MM:SS 注释：支持的范围是从 '-838:59:59' 到 '838:59:59' |
+| YEAR()      | 2 位或 4 位格式的年。注释：4 位格式所允许的值：1901 到 2155。2 位格式所允许的值：70 到 69，表示从 1970 到 2069。 |
+
+\* 即便 DATETIME 和 TIMESTAMP 返回相同的格式，它们的工作方式很不同。在 INSERT 或 UPDATE 查询中，TIMESTAMP 自动把自身设置为当前的日期和时间。TIMESTAMP 也接受不同的格式，比如 YYYYMMDDHHMMSS、YYMMDDHHMMSS、YYYYMMDD 或 YYMMDD。
+
+---
+
+## SQL 服务器
+
+现代的SQL服务器构建在RDBMS之上
+
+---
+
+### DBMS -数据库管理系统（Database Management system)
+
+数据库管理系统是一种可以访问数据库中数据的计算机程序。
+
+DBMS使我们有能力在数据苦衷提取，修改或者存贮信息。
+
+不同的DBMS提供不同的函数供查询，提交以及修改数据。
+
+---
+
+## RDBMS-关系数据库管理系统(Relational Database Management System)
+
+关系数据库管理系统（rdbms）也是一种数据库管理系统，其数据库是根据数据间关系来组织和访问数据的。
+
+RDBMS 是 SQL 的基础，也是所有现代数据库系统诸如 Oracle、SQL Server、IBM DB2、Sybase、MySQL 以及 Microsoft Access 的基础。 
+
+---
+
+# SQL 函数
+
+内建函数的语法：
+
+```mssql
+select function(col) from table
+```
+
+函数类型：
+
+​	Aggregate函数和Scale函数
+
+---
+
+合计函数(Aaggregate functions)
+
+Aggregate函数的操作面向一系列的值，并返回单一的值。
+
+**注释:**如果select语句的项目列表中的众多其他表达式中使用select语句，则这个select必须使用Group By语句。
+
+Persons表:
+
+| Name           | Age  |
+| -------------- | ---- |
+| Adams, John    | 38   |
+| Bush, George   | 33   |
+| Carter, Thomas | 28   |
+
+### MS Access 中的合计函数
+
+| 函数                                                         | 描述                             |
+| ------------------------------------------------------------ | -------------------------------- |
+| [AVG(column)](http://www.w3school.com.cn/sql/sql_func_avg.asp) | 返回某列的平均值                 |
+| [COUNT(column)](http://www.w3school.com.cn/sql/sql_func_count.asp) | 返回某列的行数（不包括 NULL 值） |
+| [COUNT(*)](http://www.w3school.com.cn/sql/sql_func_count_ast.asp) | 返回被选行数                     |
+| FIRST(column)                                                | 返回在指定的域中第一个记录的值   |
+| LAST(column)                                                 | 返回在指定的域中最后一个记录的值 |
+| [MAX(column)](http://www.w3school.com.cn/sql/sql_func_max.asp) | 返回某列的最高值                 |
+| [MIN(column)](http://www.w3school.com.cn/sql/sql_func_min.asp) | 返回某列的最低值                 |
+| STDEV(column)                                                |                                  |
+| STDEVP(column)                                               |                                  |
+| [SUM(column)](http://www.w3school.com.cn/sql/sql_func_sum.asp) | 返回某列的总和                   |
+| VAR(column)                                                  |                                  |
+| VARP(column)                                                 |                                  |
+
+### 在 SQL Server 中的合计函数
+
+| 函数                                                         | 描述                                                     |
+| ------------------------------------------------------------ | -------------------------------------------------------- |
+| [AVG(column)](http://www.w3school.com.cn/sql/sql_func_avg.asp) | 返回某列的平均值                                         |
+| BINARY_CHECKSUM                                              |                                                          |
+| CHECKSUM                                                     |                                                          |
+| CHECKSUM_AGG                                                 |                                                          |
+| [COUNT(column)](http://www.w3school.com.cn/sql/sql_func_count.asp) | 返回某列的行数（不包括NULL值）                           |
+| [COUNT(*)](http://www.w3school.com.cn/sql/sql_func_count_ast.asp) | 返回被选行数                                             |
+| [COUNT(DISTINCT column)](http://www.w3school.com.cn/sql/sql_func_count_distinct.asp) | 返回相异结果的数目                                       |
+| [FIRST(column)](http://www.w3school.com.cn/sql/sql_func_first.asp) | 返回在指定的域中第一个记录的值（SQLServer2000 不支持）   |
+| [LAST(column)](http://www.w3school.com.cn/sql/sql_func_last.asp) | 返回在指定的域中最后一个记录的值（SQLServer2000 不支持） |
+| [MAX(column)](http://www.w3school.com.cn/sql/sql_func_max.asp) | 返回某列的最高值                                         |
+| [MIN(column)](http://www.w3school.com.cn/sql/sql_func_min.asp) | 返回某列的最低值                                         |
+| STDEV(column)                                                |                                                          |
+| STDEVP(column)                                               |                                                          |
+| [SUM(column)](http://www.w3school.com.cn/sql/sql_func_sum.asp) | 返回某列的总和                                           |
+| VAR(column)                                                  |                                                          |
+| VARP(column)                                                 |                                                          |
+
+---
+
+## Scalar函数
+
+Scalar函数的操作面向某个单一的值，并返回输入值的一个单一的值。
+
+### MS Access 中的 Scalar 函数
+
+| 函数                    | 描述                                   |
+| ----------------------- | -------------------------------------- |
+| UCASE(c)                | 将某个域转换为大写                     |
+| LCASE(c)                | 将某个域转换为小写                     |
+| MID(c,start[,end])      | 从某个文本域提取字符                   |
+| LEN(c)                  | 返回某个文本域的长度                   |
+| INSTR(c,char)           | 返回在某个文本域中指定字符的数值位置   |
+| LEFT(c,number_of_char)  | 返回某个被请求的文本域的左侧部分       |
+| RIGHT(c,number_of_char) | 返回某个被请求的文本域的右侧部分       |
+| ROUND(c,decimals)       | 对某个数值域进行指定小数位数的四舍五入 |
+| MOD(x,y)                | 返回除法操作的余数                     |
+| NOW()                   | 返回当前的系统日期                     |
+| FORMAT(c,format)        | 改变某个域的显示方式                   |
+| DATEDIFF(d,date1,date2) | 用于执行日期计算                       |
+
+---
+
+### 定义和用法
+
+SQL AVG()用法
+
+select avg(col) from table_name
+
+---
+
+ 
